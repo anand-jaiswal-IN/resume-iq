@@ -23,6 +23,11 @@ An interactive, context-aware AI Resume Bot powered by **LangChain + Gemini + Qd
 - **Frontend**: **React Router 7** + Tailwind CSS + Material-UI with bento box dashboard, light/dark mode, and real-time streaming chat.
 - **CI/CD**: **GitHub Actions** end-to-end pipeline covering linting, pytest, typechecking, frontend bundling, Docker compose validation, and container image publishing to GitHub Container Registry (GHCR).
 
+## Screenshots (Web UI)
+![image1](screenshots/1.png)
+![image2](screenshots/2.png)
+![image3](screenshots/3.png)
+
 ---
 
 ## 🐳 Quick Start with Docker Compose
