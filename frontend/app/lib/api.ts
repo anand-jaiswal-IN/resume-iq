@@ -15,8 +15,8 @@ import type {
 } from "./types";
 
 const API_BASE_URL = typeof window !== "undefined"
-  ? (window as any).__ENV__?.API_BASE_URL || "http://localhost:8000"
-  : "http://localhost:8000";
+  ? (window as any).__ENV__?.API_BASE_URL || (import.meta as any).env?.VITE_API_BASE_URL || "http://localhost:8000"
+  : process.env.API_BASE_URL || "http://localhost:8000";
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

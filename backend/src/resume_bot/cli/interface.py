@@ -78,7 +78,7 @@ def print_welcome() -> None:
     console.print(
         Panel.fit(
             f"[bold cyan]{APP_NAME}[/bold cyan] [dim]-- Phase 2: Enhanced RAG[/dim]\n"
-            "[dim]Powered by Gemini 3.8 Flash + LangChain + ChromaDB + Pydantic[/dim]\n\n"
+            "[dim]Powered by Gemini 3.8 Flash + LangChain + Qdrant + Pydantic[/dim]\n\n"
             "[green]* Talk directly to the resume with context-aware semantic search[/green]\n"
             "[green]* Paste any Job Description (JD) to evaluate candidate fit & get match score[/green]\n"
             "[dim]Type [bold]/help[/bold] to see all available commands.[/dim]",
@@ -301,13 +301,13 @@ def ingest_resume(pdf_path: str | Path, reset: bool = True) -> ResumeMetadata:
     Run the Enhanced RAG ingestion pipeline:
       1. Load PDF & hyperlinks
       2. Semantic section-aware chunking
-      3. Index chunks into ChromaDB
+      3. Index chunks into Qdrant
       4. Extract and cache full structured CandidateProfile
     """
     with Status("[cyan]1/3 Loading PDF & extracting hyperlinks...[/cyan]", console=console):
         documents, meta = load_resume(pdf_path)
 
-    with Status("[cyan]2/3 Semantic chunking & indexing into ChromaDB...[/cyan]", console=console):
+    with Status("[cyan]2/3 Semantic chunking & indexing into Qdrant...[/cyan]", console=console):
         chunks = chunk_documents(documents)
         chunk_summary = get_chunk_summary(chunks)
         store = index_documents(chunks, reset=reset)

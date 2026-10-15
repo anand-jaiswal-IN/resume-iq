@@ -261,7 +261,7 @@ export default function Home() {
                   </h2>
                   <p className="text-sm text-[#5a5852] mt-2 leading-relaxed">
                     Upload your first candidate PDF resume to automatically index its
-                    skills, experience, and projects into ChromaDB for real-time RAG chat.
+                    skills, experience, and projects into Qdrant for real-time RAG chat.
                   </p>
                   <button
                     type="button"
@@ -329,7 +329,7 @@ export default function Home() {
                           {activeResume.total_chunks || 0} Chunks
                         </span>
                         <span className="px-2.5 py-1 rounded-full bg-[#f7f7f4] border border-[#e6e5e0] text-[#26251e] text-[11px] font-medium">
-                          ChromaDB RAG
+                          Qdrant RAG
                         </span>
                         <span className="px-2.5 py-1 rounded-full bg-[#f7f7f4] border border-[#e6e5e0] text-[#26251e] text-[11px] font-medium">
                           Gemini 2.5 Flash

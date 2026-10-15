@@ -61,7 +61,7 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
     setUploadStep("1/3 Uploading & extracting text/links...");
 
     try {
-      setTimeout(() => setUploadStep("2/3 Semantic chunking & indexing into ChromaDB..."), 2500);
+      setTimeout(() => setUploadStep("2/3 Semantic chunking & indexing into Qdrant..."), 2500);
       setTimeout(() => setUploadStep("3/3 Extracting structured candidate profile with Gemini..."), 6000);
 
       await api.uploadResume(selectedFile);
@@ -129,7 +129,7 @@ export const ResumeUploadModal: React.FC<ResumeUploadModalProps> = ({
               Upload Resume
             </h2>
             <p className="text-[11px] text-[#807d72]">
-              Index into ChromaDB for interactive AI Q&A
+              Index into Qdrant for interactive AI Q&A
             </p>
           </div>
         </div>

@@ -26,6 +26,7 @@ build/
 
 # ── Vector store (local data, do not commit) ──────────────────────────────────
 chroma_db/*
+qdrant_storage/
 faiss_index/
 *.faiss
 *.pkl

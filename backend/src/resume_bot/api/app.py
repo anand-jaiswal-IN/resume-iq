@@ -42,7 +42,7 @@ def create_app() -> FastAPI:
             "Features:\n"
             "- **REST Endpoints**: Resume PDF upload, candidate profile, executive summaries, links extraction, and JD matching.\n"
             "- **WebSocket Streaming**: Token-by-token real-time streaming chat (`/ws/chat`).\n"
-            "- **Modern RAG**: LCEL chains, Gemini LLM & embeddings, ChromaDB, and Pydantic structured output."
+            "- **Modern RAG**: LCEL chains, Gemini LLM & embeddings, Qdrant, and Pydantic structured output."
         ),
         lifespan=lifespan,
     )

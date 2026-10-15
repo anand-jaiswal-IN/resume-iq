@@ -20,7 +20,7 @@ class ResumeStatusResponse(BaseModel):
     file_name: str | None = Field(default=None, description="Name of the active resume file")
     candidate_name: str | None = Field(default=None, description="Name of the candidate if extracted")
     headline: str | None = Field(default=None, description="Current title or headline of candidate")
-    total_chunks: int = Field(default=0, description="Total indexed chunks in ChromaDB")
+    total_chunks: int = Field(default=0, description="Total indexed chunks in Qdrant")
     total_links: int = Field(default=0, description="Number of hyperlinks extracted")
     active_resume_id: str | None = Field(default=None, description="Active resume unique identifier")
     total_resumes: int = Field(default=0, description="Total count of resumes present in the backend")

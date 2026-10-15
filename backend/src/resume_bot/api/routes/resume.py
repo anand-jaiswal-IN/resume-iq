@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, HTTPException, Query, status
 
-from resume_bot.config import DATA_DIR, CHROMA_COLLECTION_NAME
+from resume_bot.config import DATA_DIR, QDRANT_COLLECTION_NAME, CHROMA_COLLECTION_NAME
 from resume_bot.ingestion.loader import load_resume, extract_links
 from resume_bot.ingestion.chunker import chunk_documents, get_chunk_summary
 from resume_bot.vectorstore.store import (
@@ -140,7 +140,7 @@ async def delete_resume_endpoint(resume_id: str):
             detail=f"Resume with ID '{resume_id}' not found.",
         )
 
-    # Delete chroma collections
+    # Delete Qdrant collections
     delete_collection(target.collection_name)
     delete_all_sessions_for_resume(resume_id)
 
@@ -166,7 +166,7 @@ async def delete_resume_endpoint(resume_id: str):
 @router.post("/api/resume/upload", response_model=UploadResumeResponse)
 async def upload_resume(file: UploadFile = File(...)):
     """
-    Upload a resume PDF, parse text & links, index into ChromaDB with assigned ID & metadata,
+    Upload a resume PDF, parse text & links, index into Qdrant with assigned ID & metadata,
     and initialize an active chat session.
     """
     if not file.filename.lower().endswith(".pdf"):
@@ -201,10 +201,10 @@ async def upload_resume(file: UploadFile = File(...)):
         chunks = chunk_documents(documents)
         chunk_summary = get_chunk_summary(chunks)
 
-        # Index into Chroma collection for this resume and shared collection
+        # Index into Qdrant collection for this resume and shared collection
         collection_name = f"resume_{resume_id}"
         index_documents(chunks, collection_name=collection_name, reset=True)
-        index_documents(chunks, collection_name=CHROMA_COLLECTION_NAME, reset=True)
+        index_documents(chunks, collection_name=QDRANT_COLLECTION_NAME, reset=True)
 
         # Extract structured candidate profile
         profile = extract_candidate_profile(

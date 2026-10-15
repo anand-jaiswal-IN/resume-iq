@@ -13,10 +13,20 @@ load_dotenv()
 # ── Project paths ─────────────────────────────────────────────────────────────
 ROOT_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = ROOT_DIR / "data" / "resumes"
-CHROMA_DIR = ROOT_DIR / "chroma_db"
-
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-CHROMA_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── Qdrant Vector Store ───────────────────────────────────────────────────────
+QDRANT_URL: str = os.getenv("QDRANT_URL", "")
+QDRANT_API_KEY: str | None = os.getenv("QDRANT_API_KEY", None)
+QDRANT_PATH: Path = Path(os.getenv("QDRANT_PATH", str(ROOT_DIR / "qdrant_storage")))
+QDRANT_COLLECTION_NAME: str = os.getenv("QDRANT_COLLECTION_NAME", "resume_collection")
+
+if not QDRANT_URL:
+    QDRANT_PATH.mkdir(parents=True, exist_ok=True)
+
+# Legacy aliases for backward compatibility
+CHROMA_DIR: Path = ROOT_DIR / "chroma_db"
+CHROMA_COLLECTION_NAME: str = QDRANT_COLLECTION_NAME
 
 # ── Google / Gemini ───────────────────────────────────────────────────────────
 GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
@@ -48,9 +58,6 @@ RETRIEVER_SEARCH_TYPE: str = "mmr"
 RETRIEVER_K: int = 5          # Final chunks returned to LLM
 RETRIEVER_FETCH_K: int = 10   # Candidate pool for MMR diversity selection
 RETRIEVER_LAMBDA: float = 0.6 # MMR tradeoff: 1.0=pure similarity, 0.0=pure diversity
-
-# ── ChromaDB ──────────────────────────────────────────────────────────────────
-CHROMA_COLLECTION_NAME: str = "resume_collection"
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
 APP_NAME: str = "Resume IQ"

@@ -1,29 +1,24 @@
 """
-ChromaDB vector store — persistent, developer-friendly, metadata-filterable.
+Qdrant vector store — high-performance, container-ready, metadata-filterable.
 
-Why ChromaDB for dev/testing?
-  - Zero-config local SQLite persistence
-  - Effortless metadata filtering (filter by section, candidate, etc.)
-  - Python-native API
-  - Easy to swap for FAISS/Pinecone in production (same LangChain interface)
-
-ChromaDB → FAISS migration path (Phase 4):
-  Replace Chroma(...) with FAISS.from_documents(...) and
-  faiss_index.save_local() / FAISS.load_local() — zero chain changes needed.
+Configured to run in either:
+  1. Distributed/server mode via QDRANT_URL (e.g., http://qdrant:6333 in Docker Compose or Cloud)
+  2. Embedded local disk mode via QDRANT_PATH (when QDRANT_URL is not set)
 """
 
 from __future__ import annotations
 from typing import Any
 from pathlib import Path
-import chromadb
-
-from langchain_chroma import Chroma
+from qdrant_client import QdrantClient, models
+from langchain_qdrant import QdrantVectorStore
 from langchain_core.documents import Document
-from langchain_core.vectorstores import VectorStore
 
 from resume_bot.config import (
-    CHROMA_DIR,
-    CHROMA_COLLECTION_NAME,
+    QDRANT_URL,
+    QDRANT_API_KEY,
+    QDRANT_PATH,
+    QDRANT_COLLECTION_NAME,
+    EMBEDDING_DIMENSIONS,
     RETRIEVER_SEARCH_TYPE,
     RETRIEVER_K,
     RETRIEVER_FETCH_K,
@@ -31,74 +26,93 @@ from resume_bot.config import (
 )
 from resume_bot.vectorstore.embeddings import get_document_embeddings
 
-_chroma_client: chromadb.api.ClientAPI | None = None
+_qdrant_client: QdrantClient | None = None
 
 
-def get_chroma_client() -> chromadb.api.ClientAPI:
+def get_qdrant_client() -> QdrantClient:
     """
-    Return a singleton PersistentClient instance.
-    Using a shared client prevents multi-client SQLite cache desync and
-    stale collection UUID lookups.
+    Return a singleton QdrantClient instance.
+    Connects to remote/Docker Qdrant if QDRANT_URL is configured,
+    otherwise uses local persistent storage at QDRANT_PATH.
     """
-    global _chroma_client
-    if _chroma_client is None:
-        CHROMA_DIR.mkdir(parents=True, exist_ok=True)
-        _chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
-    return _chroma_client
+    global _qdrant_client
+    if _qdrant_client is None:
+        if QDRANT_URL:
+            _qdrant_client = QdrantClient(
+                url=QDRANT_URL,
+                api_key=QDRANT_API_KEY,
+            )
+        else:
+            QDRANT_PATH.mkdir(parents=True, exist_ok=True)
+            _qdrant_client = QdrantClient(path=str(QDRANT_PATH))
+    return _qdrant_client
 
 
-def get_vector_store(collection_name: str = CHROMA_COLLECTION_NAME) -> Chroma:
+# Backward-compatible alias
+get_chroma_client = get_qdrant_client
+
+
+def ensure_collection_exists(
+    client: QdrantClient,
+    collection_name: str,
+    vector_size: int = EMBEDDING_DIMENSIONS,
+) -> None:
+    """Ensure the target collection exists in Qdrant with proper vector configuration."""
+    if not client.collection_exists(collection_name=collection_name):
+        client.create_collection(
+            collection_name=collection_name,
+            vectors_config=models.VectorParams(
+                size=vector_size,
+                distance=models.Distance.COSINE,
+            ),
+        )
+
+
+def get_vector_store(collection_name: str = QDRANT_COLLECTION_NAME) -> QdrantVectorStore:
     """
-    Return (or create) a persistent ChromaDB collection.
-    Uses the shared persistent client to guarantee consistent collection IDs.
+    Return (or create) a persistent Qdrant vector store collection.
     """
-    client = get_chroma_client()
-    return Chroma(
+    client = get_qdrant_client()
+    ensure_collection_exists(client, collection_name=collection_name)
+    return QdrantVectorStore(
         client=client,
         collection_name=collection_name,
-        embedding_function=get_document_embeddings(),
+        embedding=get_document_embeddings(),
     )
 
 
 def index_documents(
     chunks: list[Document],
-    collection_name: str = CHROMA_COLLECTION_NAME,
+    collection_name: str = QDRANT_COLLECTION_NAME,
     reset: bool = False,
-) -> Chroma:
+) -> QdrantVectorStore:
     """
-    Embed and store document chunks into ChromaDB.
+    Embed and store document chunks into Qdrant.
 
-    When reset=True, clears existing documents in-place rather than deleting the
-    collection entity. This preserves the collection UUID and prevents
-    NotFoundError in active retrievers and chains.
+    When reset=True, recreates the collection to wipe existing points.
 
     Args:
         chunks:          Enriched chunks from the chunker.
-        collection_name: ChromaDB collection to use.
+        collection_name: Qdrant collection to use.
         reset:           If True, clears existing documents from the collection.
 
     Returns:
-        The populated Chroma vector store.
+        The populated QdrantVectorStore.
     """
-    client = get_chroma_client()
+    client = get_qdrant_client()
 
-    if reset:
+    if reset and client.collection_exists(collection_name=collection_name):
         try:
-            col = client.get_or_create_collection(name=collection_name)
-            existing = col.get()
-            if existing and existing.get("ids"):
-                col.delete(ids=existing["ids"])
+            client.delete_collection(collection_name=collection_name)
         except Exception:
-            # Fallback if collection was in an inconsistent state
-            try:
-                client.delete_collection(name=collection_name)
-            except Exception:
-                pass
+            pass
 
-    store = Chroma(
+    ensure_collection_exists(client, collection_name=collection_name)
+
+    store = QdrantVectorStore(
         client=client,
         collection_name=collection_name,
-        embedding_function=get_document_embeddings(),
+        embedding=get_document_embeddings(),
     )
 
     if chunks:
@@ -107,9 +121,9 @@ def index_documents(
     return store
 
 
-def get_retriever(store: Chroma | None = None, collection_name: str = CHROMA_COLLECTION_NAME):
+def get_retriever(store: QdrantVectorStore | None = None, collection_name: str = QDRANT_COLLECTION_NAME):
     """
-    Build an MMR retriever from the vector store.
+    Build an MMR retriever from the Qdrant vector store.
 
     MMR (Maximal Marginal Relevance) configuration:
       - k=5 final chunks returned to LLM
@@ -117,7 +131,7 @@ def get_retriever(store: Chroma | None = None, collection_name: str = CHROMA_COL
       - lambda_mult=0.6 balances relevance (1.0) vs diversity (0.0)
 
     Args:
-        store: An existing Chroma store. If None, loads from disk.
+        store: An existing Qdrant store. If None, initializes from client.
         collection_name: Collection name to use if store is None.
 
     Returns:
@@ -136,32 +150,37 @@ def get_retriever(store: Chroma | None = None, collection_name: str = CHROMA_COL
     )
 
 
-def collection_is_populated(collection_name: str = CHROMA_COLLECTION_NAME) -> bool:
-    """Check if the ChromaDB collection already has documents indexed."""
+def collection_is_populated(collection_name: str = QDRANT_COLLECTION_NAME) -> bool:
+    """Check if the Qdrant collection exists and has points indexed."""
     try:
-        client = get_chroma_client()
-        col = client.get_or_create_collection(name=collection_name)
-        return col.count() > 0
+        client = get_qdrant_client()
+        if not client.collection_exists(collection_name=collection_name):
+            return False
+        info = client.get_collection(collection_name=collection_name)
+        return (info.points_count or 0) > 0
     except Exception:
         return False
 
 
-def get_collection_stats(collection_name: str = CHROMA_COLLECTION_NAME) -> dict:
+def get_collection_stats(collection_name: str = QDRANT_COLLECTION_NAME) -> dict:
     """Return stats about the current collection for UI and CLI display."""
     try:
-        client = get_chroma_client()
-        col = client.get_or_create_collection(name=collection_name)
-        count = col.count()
+        client = get_qdrant_client()
+        if not client.collection_exists(collection_name=collection_name):
+            return {"document_count": 0, "collection": collection_name}
+        info = client.get_collection(collection_name=collection_name)
+        count = info.points_count or 0
         return {"document_count": count, "collection": collection_name}
     except Exception:
         return {"document_count": 0, "collection": collection_name}
 
 
 def delete_collection(collection_name: str) -> bool:
-    """Delete a ChromaDB collection permanently."""
+    """Delete a Qdrant collection permanently."""
     try:
-        client = get_chroma_client()
-        client.delete_collection(name=collection_name)
+        client = get_qdrant_client()
+        if client.collection_exists(collection_name=collection_name):
+            client.delete_collection(collection_name=collection_name)
         return True
     except Exception:
         return False
@@ -176,4 +195,4 @@ def get_active_collection_name() -> str:
             return active.collection_name
     except Exception:
         pass
-    return CHROMA_COLLECTION_NAME
+    return QDRANT_COLLECTION_NAME

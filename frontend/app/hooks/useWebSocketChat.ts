@@ -3,8 +3,8 @@ import type { ChatMessage, IntentType, JobFitEvaluation } from "../lib/types";
 import { api } from "../lib/api";
 
 const WS_URL = typeof window !== "undefined"
-  ? (window as any).__ENV__?.WS_URL || "ws://localhost:8000/ws/chat"
-  : "ws://localhost:8000/ws/chat";
+  ? (window as any).__ENV__?.WS_URL || (import.meta as any).env?.VITE_WS_URL || "ws://localhost:8000/ws/chat"
+  : process.env.WS_URL || "ws://localhost:8000/ws/chat";
 
 export function useWebSocketChat(sessionId: string = "default", resumeId?: string | null) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);

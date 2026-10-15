@@ -2,7 +2,7 @@
 
 Interactive Context-Aware AI Resume Bot — talk to your PDF resume using RAG.
 
-Built with **LangChain + Gemini + ChromaDB** for the CLI phase.
+Built with **LangChain + Gemini + Qdrant** for high performance RAG.
 
 ---
 
@@ -13,7 +13,7 @@ Built with **LangChain + Gemini + ChromaDB** for the CLI phase.
 - 🔍 **MMR retrieval** — diverse, non-redundant context for the LLM
 - 💬 **Multi-turn chat** — remembers conversation history per session
 - ⚡ **Streaming** — token-by-token live output
-- 🗃️ **ChromaDB** — persistent local vector store (SQLite-backed)
+- 🗃️ **Qdrant** — high-performance vector store (standalone server or embedded)
 
 ---
 
@@ -176,9 +176,9 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ## Tech Stack
 
-- **LLM**: `gemini-2.0-flash` via `langchain-google-genai`
-- **Embeddings**: `text-embedding-004`
-- **Vector DB**: ChromaDB → FAISS (production)
-- **Framework**: LangChain LCEL
+- **LLM**: `gemini-3.5-flash-lite` via `langchain-google-genai`
+- **Embeddings**: `gemini-embedding-2` (Matryoshka 768 dims)
+- **Vector DB**: Qdrant (`langchain-qdrant`, `qdrant-client`)
+- **Framework**: LangChain LCEL + FastAPI
 - **PDF**: PyMuPDF
 - **CLI**: Rich

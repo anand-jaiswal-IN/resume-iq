@@ -20,7 +20,7 @@ We are looking for a Full Stack AI Engineer to design and deploy modern web appl
 
 Key Requirements:
 - Strong proficiency in Python, JavaScript/TypeScript, and React or Next.js
-- Hands-on experience building RAG systems with LangChain, Vector Databases (ChromaDB, Pinecone, or FAISS)
+- Hands-on experience building RAG systems with LangChain, Vector Databases (Qdrant, Pinecone, or FAISS)
 - Experience designing RESTful APIs using FastAPI, Node.js, or Django
 - Familiarity with containerization using Docker
 - Knowledge of relational databases (PostgreSQL/MySQL) and Redis caching

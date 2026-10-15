@@ -24,7 +24,7 @@ class ResumeMetadata(BaseModel):
     total_pages: int = Field(default=1, description="Number of pages in PDF")
     total_chunks: int = Field(default=0, description="Total indexed text chunks")
     links_count: int = Field(default=0, description="Number of extracted hyperlinks")
-    collection_name: str = Field(default="resume_collection", description="ChromaDB collection name")
+    collection_name: str = Field(default="resume_collection", description="Qdrant collection name")
     is_active: bool = Field(default=False, description="Whether this is the currently active resume")
 
 

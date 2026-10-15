@@ -1,14 +1,13 @@
 [project]
 name = "ai-resume-bot"
 version = "0.1.0"
-description = "Interactive Context-Aware AI Resume Bot — RAG with LangChain + Gemini + ChromaDB"
+description = "Interactive Context-Aware AI Resume Bot — RAG with LangChain + Gemini + Qdrant"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "langchain>=0.3.0",
     "langchain-google-genai>=2.0.0",
     "langchain-community>=0.3.0",
-    "langchain-chroma>=0.1.0",
     "pymupdf>=1.24.0",
     "python-dotenv>=1.0.0",
     "rich>=13.0.0",
@@ -17,6 +16,9 @@ dependencies = [
     "fastapi>=0.143.1",
     "python-multipart>=0.0.32",
     "websockets>=16.1.1",
+    "langchain-qdrant>=1.1.0",
+    "qdrant-client>=1.19.1",
+    "uvicorn>=0.54.0",
 ]
 
 [tool.uv]

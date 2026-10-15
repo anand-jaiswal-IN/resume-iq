@@ -91,7 +91,7 @@ export const ResumeListPanel: React.FC<ResumeListPanelProps> = ({
             </div>
             <p className="text-xs text-[#5a5852] font-semibold">Welcome to Resume IQ</p>
             <p className="text-[11px] text-[#807d72] mt-0.5 max-w-[180px]">
-              Upload a resume PDF to index into ChromaDB and start asking questions.
+              Upload a resume PDF to index into Qdrant and start asking questions.
             </p>
             <button
               type="button"
