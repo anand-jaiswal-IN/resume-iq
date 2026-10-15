@@ -30,7 +30,7 @@ Built with **LangChain + Gemini + Qdrant** for high performance RAG.
 ```bash
 # Clone the repo
 git clone <repo-url>
-cd ai-resume-bot
+cd resume-iq
 
 # Install dependencies
 uv sync

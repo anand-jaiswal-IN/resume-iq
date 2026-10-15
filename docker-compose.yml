@@ -2,7 +2,7 @@ services:
   # ── Qdrant Vector Database ──────────────────────────────────────────────────
   qdrant:
     image: qdrant/qdrant:latest
-    container_name: ai-resume-qdrant
+    container_name: resume-iq-qdrant
     restart: unless-stopped
     ports:
       - "6333:6333" # HTTP REST API & Web UI Dashboard
@@ -23,7 +23,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: ai-resume-backend
+    container_name: resume-iq-backend
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -53,7 +53,7 @@ services:
       args:
         VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
         VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8000/ws/chat}
-    container_name: ai-resume-frontend
+    container_name: resume-iq-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"

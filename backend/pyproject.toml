@@ -1,5 +1,5 @@
 [project]
-name = "ai-resume-bot"
+name = "resume-iq"
 version = "0.1.0"
 description = "Interactive Context-Aware AI Resume Bot — RAG with LangChain + Gemini + Qdrant"
 readme = "README.md"

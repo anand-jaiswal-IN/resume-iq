@@ -14,7 +14,7 @@ from pathlib import Path
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="ai-resume-bot",
+        prog="resume-iq",
         description="Interactive Context-Aware AI Resume Bot (RAG + Gemini)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
